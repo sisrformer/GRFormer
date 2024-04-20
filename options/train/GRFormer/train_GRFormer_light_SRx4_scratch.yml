@@ -1,0 +1,126 @@
+datasets:
+  train:
+    batch_size_per_gpu: 4
+    dataroot_gt: ../datasets/DIV2K/HR
+    dataroot_lq: ../datasets/DIV2K/LR_bicubic/X4
+    dataset_enlarge_ratio: 1
+    filename_tmpl: '{}x4'
+    gt_size: 256
+    io_backend:
+      type: disk
+    name: DIV2K
+    num_worker_per_gpu: 8
+    prefetch_mode: null
+    type: PairedImageDataset
+    use_hflip: true
+    use_rot: true
+    use_shuffle: true
+  val_1:
+    dataroot_gt: ../datasets/benchmark/Set5/HR
+    dataroot_lq: ../datasets/benchmark/Set5/LR_bicubic/X4
+    filename_tmpl: '{}x4'
+    io_backend:
+      type: disk
+    name: Set5
+    type: PairedImageDataset
+  val_2: # the 2st test dataset
+    name: Set14
+    type: PairedImageDataset
+    dataroot_gt: ../datasets/benchmark/Set14/HR
+    dataroot_lq: ../datasets/benchmark/Set14/LR_bicubic/X4
+    filename_tmpl: '{}x4'
+    io_backend:
+      type: disk
+  val_3: # the 3st test dataset
+    name: B100
+    type: PairedImageDataset
+    dataroot_gt: ../datasets/benchmark/B100/HR
+    dataroot_lq: ../datasets/benchmark/B100/LR_bicubic/X4
+    filename_tmpl: '{}x4'
+    io_backend:
+      type: disk
+  val_4: # the 4st test dataset
+    name: Urban100
+    type: PairedImageDataset
+    dataroot_gt: ../datasets/benchmark/Urban100/HR
+    dataroot_lq: ../datasets/benchmark/Urban100/LR_bicubic/X4
+    filename_tmpl: '{}x4'
+    io_backend:
+      type: disk
+dist_params:
+  backend: nccl
+  port: 28500
+logger:
+  print_freq: 100
+  save_checkpoint_freq: 5000.0
+  use_tb_logger: true
+  wandb:
+    project: null
+    resume_id: null
+manual_seed: 0
+model_type: GRModel
+name: train_GRFormer_SRx4_scratch
+network_g:
+  depths:
+  - 6
+  - 6
+  - 6
+  - 6
+  embed_dim: 60
+  img_range: 1.0
+  img_size: 64
+  in_chans: 3
+  mlp_ratio: 2
+  num_heads:
+  - 3
+  - 3
+  - 3
+  - 3
+  resi_connection: 1conv
+  type: GRFormer
+  upsampler: pixelshuffledirect
+  upscale: 4
+  window_size:
+  - 8
+  - 32
+num_gpu: 4
+path:
+  pretrain_network_g: ~
+  resume_state: ~
+  strict_load_g: true
+print_network: false
+scale: 4
+train:
+  optim_g:
+    betas:
+    - 0.9
+    - 0.99
+    lr: 0.0002
+    type: Adam
+    weight_decay: 0
+  pixel_opt:
+    loss_weight: 1.0
+    reduction: mean
+    type: L1Loss
+  scheduler:
+    gamma: 0.5
+    milestones:
+    - 250000
+    - 400000
+    - 450000
+    - 475000
+    type: MultiStepLR
+  total_iter: 600000
+  warmup_iter: -1
+val:
+  metrics:
+    psnr:
+      crop_border: 4
+      test_y_channel: true
+      type: calculate_psnr
+    ssim:
+      crop_border: 4
+      test_y_channel: true
+      type: calculate_ssim
+  save_img: false
+  val_freq: 5000
