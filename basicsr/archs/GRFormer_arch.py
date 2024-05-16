@@ -281,15 +281,14 @@ class GRSAB(nn.Module):
         else:
             shifted_x = x
 
-        b, h, w, c = x.shape
-        x = window_partition(x, self.window_size)
-        x = x.view(x.shape[0], x.shape[1] * x.shape[2], x.shape[3])
+        shifted_x = window_partition(shifted_x, self.window_size)
+        shifted_x = shifted_x.view(shifted_x.shape[0], shifted_x.shape[1] * shifted_x.shape[2], shifted_x.shape[3])
         # W-MSA/SW-MSA (to be compatible for testing on images whose shapes are the multiple of window size
         if self.img_size == x_size:
             attn_windows = self.attn(shifted_x, mask=self.attn_mask)  # nw*b, window_size*window_size, c
         else:
             attn_windows = self.attn(shifted_x, mask=self.calculate_mask(x_size).to(x.device))
-        x = window_reverse(x, self.window_size, h, w)
+        attn_windows = window_reverse(attn_windows, self.window_size, h, w)
 
         # reverse cyclic shift
         if self.shift_size[0] > 0:
